@@ -103,6 +103,22 @@ class AVLTree:
         result = []
         self.inorder_traversal(self.root, result)
         return result
+    
+    def find(self, root, name):
+        if not root:
+            return None
+        if name[0].upper() < root.initial:
+            return self.find(root.left, name)
+        elif name[0].upper() > root.initial:
+            return self.find(root.right, name)
+        else:
+            # Busca na lista encadeada
+            current = root.contacts
+            while current:
+                if current.name == name:
+                    return current.phone
+                current = current.next
+            return None    
 
 def main_menu(avl):
     while True:
@@ -121,7 +137,7 @@ def main_menu(avl):
             print("Contato inserido com sucesso!")
         elif choice == '2':
             name = input("Digite o nome do contato para buscar: ")
-            result = avl.find(name)
+            result = avl.find(avl.root, name)
             if result:
                 print(f"Telefone: {result}")
             else:
