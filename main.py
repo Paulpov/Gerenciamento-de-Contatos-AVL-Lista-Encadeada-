@@ -74,21 +74,22 @@ class AVLTree:
             new_node.next = current
             return root
 
-        root = self.balance(root)
+        self.update_height(root)
+        balance = self.get_balance(root)
+
+        # Balance the node if necessary
+        if balance > 1 and name[0].upper() < root.left.initial:
+            return self.rotate_right(root)
+        if balance < -1 and name[0].upper() > root.right.initial:
+            return self.rotate_left(root)
+        if balance > 1 and name[0].upper() > root.left.initial:
+            root.left = self.rotate_left(root.left)
+            return self.rotate_right(root)
+        if balance < -1 and name[0].upper() < root.right.initial:
+            root.right = self.rotate_right(root.right)
+            return self.rotate_left(root)
+
         return root
-
-    def balance(self, node):
-        self.update_height(node)
-        balance = self.get_balance(node)
-
-        if balance > 1 and self.get_balance(node.left) < 0:
-            node.left = self.rotate_left(node.left)
-            return self.rotate_right(node)
-        if balance < -1 and self.get_balance(node.right) > 0:
-            node.right = self.rotate_right(node.right)
-            return self.rotate_left(node)
-
-        return node
 
     def inorder_traversal(self, node, result):
         if node:
@@ -104,53 +105,24 @@ class AVLTree:
         self.inorder_traversal(self.root, result)
         return result
 
-def main_menu(avl):
-    while True:
-        print("\n📖 Sistema de Gerenciamento de Contatos")
-        print("1. Inserir novo contato")
-        print("2. Buscar contato")
-        print("3. Listar todos os contatos")
-        print("4. Exibir informações do sistema")
-        print("5. Sair")
-        choice = input("Escolha uma opção: ")
+# Exemplo de uso:
+avl = AVLTree()
+contatos = [
+    ("Amanda Ferreira", "(11) 99234-5678"),
+    ("Ana Souza", "(85) 54321-9876"),
+    ("Pedro Alves", "(21) 23456-7890"),
+    ("Paulo Lima", "(47) 98765-4321"),
+    ("Beatriz Santos", "(31) 87654-3210"),
+    ("Beto Gonçalves", "(11) 56789-0123"),
+    ("Carlos Prado", "(47) 23456-7890"),
+    ("Daniela Moraes", "(85) 34567-8901"),
+    ("Eduardo Campos", "(21) 45678-9123"),
+    ("Elisa Soares", "(31) 12345-6789")
+]
 
-        if choice == '1':
-            name = input("Digite o nome do contato: ")
-            phone = input("Digite o telefone do contato: ")
-            avl.root = avl.insert(avl.root, name, phone)
-            print("Contato inserido com sucesso!")
-        elif choice == '2':
-            name = input("Digite o nome do contato para buscar: ")
-            result = avl.find(name)
-            if result:
-                print(f"Telefone: {result}")
-            else:
-                print("Contato não encontrado.")
-        elif choice == '3':
-            print("Todos os contatos:")
-            for nome, telefone in avl.list_contacts():
-                print(f"{nome}: {telefone}")
-        elif choice == '4':
-            print_system_info()
-        elif choice == '5':
-            print("Saindo do sistema...")
-            break
-        else:
-            print("Opção inválida. Por favor, tente novamente.")
+for nome, telefone in contatos:
+    avl.root = avl.insert(avl.root, nome, telefone)
 
-def print_system_info():
-    print("\n🌳 Informações do Sistema 🌳")
-    print("""
-Este sistema utiliza uma Árvore AVL para organizar os contatos pelas iniciais dos seus nomes,
-permitindo operações eficientes com tempo logarítmico. Cada nó na árvore representa uma letra do alfabeto,
-e as listas encadeadas associadas armazenam os contatos que compartilham a mesma inicial.
-
-Funcionalidades:
-- Inserção: Adiciona contatos de maneira ordenada e balanceada.
-- Busca: Procura contatos pelo nome, começando pela inicial na árvore.
-- Listagem: Exibe todos os contatos em ordem alfabética através de uma travessia in-order.
-""")
-
-if __name__ == "__main__":
-    avl = AVLTree()
-    main_menu(avl)
+print("Todos os contatos:")
+for nome, telefone in avl.list_contacts():
+    print(f"{nome}: {telefone}")

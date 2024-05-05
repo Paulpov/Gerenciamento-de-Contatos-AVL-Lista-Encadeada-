@@ -9,7 +9,7 @@ class AVLNode:
     """Classe para os nós da Árvore AVL. Cada nó armazena uma letra e uma lista de contatos."""
     def __init__(self, initial):
         self.initial = initial
-        self.contacts = None  # Head da lista encadeada
+        self.contacts = None  # Ponteiro inicial para a lista encadeada
         self.left = None
         self.right = None
         self.height = 1
@@ -52,43 +52,63 @@ class AVLTree:
 
     def insert(self, root, name, phone):
         if not root:
-            root = AVLNode(name[0].upper())
-            root.contacts = ListNode(name, phone)
-            return root
+            node = AVLNode(name[0].upper())
+            node.contacts = ListNode(name, phone)  # Criar a lista encadeada com o primeiro contato
+            return node
 
         if name[0].upper() < root.initial:
             root.left = self.insert(root.left, name, phone)
         elif name[0].upper() > root.initial:
             root.right = self.insert(root.right, name, phone)
         else:
-            current = root.contacts
-            prev = None
-            while current and current.name < name:
-                prev = current
-                current = current.next
-            new_node = ListNode(name, phone)
-            if prev:
-                prev.next = new_node
-            else:
-                root.contacts = new_node
-            new_node.next = current
-            return root
+            self.insert_in_linked_list(root, name, phone)
 
         root = self.balance(root)
         return root
 
+    def insert_in_linked_list(self, root, name, phone):
+        current = root.contacts
+        prev = None
+        while current and current.name < name:
+            prev = current
+            current = current.next
+        new_node = ListNode(name, phone)
+        if prev:
+            prev.next = new_node
+        else:
+            root.contacts = new_node
+        new_node.next = current
+
     def balance(self, node):
         self.update_height(node)
         balance = self.get_balance(node)
-
-        if balance > 1 and self.get_balance(node.left) < 0:
-            node.left = self.rotate_left(node.left)
+        if balance > 1:
+            if self.get_balance(node.left) < 0:
+                node.left = self.rotate_left(node.left)
             return self.rotate_right(node)
-        if balance < -1 and self.get_balance(node.right) > 0:
-            node.right = self.rotate_right(node.right)
+        if balance < -1:
+            if self.get_balance(node.right) > 0:
+                node.right = self.rotate_right(node.right)
             return self.rotate_left(node)
-
         return node
+
+    def find(self, root, name):
+        if not root:
+            return None
+        if name[0].upper() < root.initial:
+            return self.find(root.left, name)
+        elif name[0].upper() > root.initial:
+            return self.find(root.right, name)
+        else:
+            return self.search_in_linked_list(root.contacts, name)
+
+    def search_in_linked_list(self, contacts, name):
+        current = contacts
+        while current:
+            if current.name == name:
+                return current.phone
+            current = current.next
+        return None
 
     def inorder_traversal(self, node, result):
         if node:
@@ -103,22 +123,6 @@ class AVLTree:
         result = []
         self.inorder_traversal(self.root, result)
         return result
-    
-    def find(self, root, name):
-        if not root:
-            return None
-        if name[0].upper() < root.initial:
-            return self.find(root.left, name)
-        elif name[0].upper() > root.initial:
-            return self.find(root.right, name)
-        else:
-            # Busca na lista encadeada
-            current = root.contacts
-            while current:
-                if current.name == name:
-                    return current.phone
-                current = current.next
-            return None    
 
 def main_menu(avl):
     while True:
@@ -147,16 +151,8 @@ def main_menu(avl):
             for nome, telefone in avl.list_contacts():
                 print(f"{nome}: {telefone}")
         elif choice == '4':
-            print_system_info()
-        elif choice == '5':
-            print("Saindo do sistema...")
-            break
-        else:
-            print("Opção inválida. Por favor, tente novamente.")
-
-def print_system_info():
-    print("\n🌳 Informações do Sistema 🌳")
-    print("""
+            print("\n🌳 Informações do Sistema 🌳")
+            print("""
 Este sistema utiliza uma Árvore AVL para organizar os contatos pelas iniciais dos seus nomes,
 permitindo operações eficientes com tempo logarítmico. Cada nó na árvore representa uma letra do alfabeto,
 e as listas encadeadas associadas armazenam os contatos que compartilham a mesma inicial.
@@ -166,6 +162,11 @@ Funcionalidades:
 - Busca: Procura contatos pelo nome, começando pela inicial na árvore.
 - Listagem: Exibe todos os contatos em ordem alfabética através de uma travessia in-order.
 """)
+        elif choice == '5':
+            print("Saindo do sistema...")
+            break
+        else:
+            print("Opção inválida. Por favor, tente novamente.")
 
 if __name__ == "__main__":
     avl = AVLTree()
